@@ -1,7 +1,7 @@
 # Helpdesk Ticketing System 
 
 A real-world **Helpdesk Ticketing System** built with **C#** and **.NET 8 Web API**.  
-This project is designed for learning and portfolio purposes — showcasing how to build a backend system that could be used in IT support environments.
+This project is designed for learning and portfolio purposes, showcasing how to build a backend system that could be used in IT support environments.
 
 ---
 
@@ -32,14 +32,20 @@ This project is designed for learning and portfolio purposes — showcasing how 
 # Clone the repository
 git clone https://github.com/YourUsername/helpdesk-system.git
 cd helpdesk-system
+```
 
 # Run the API
+```bash
 dotnet run
+```
 
 
+##  Project Management
+We track progress using GitHub Projects:  
+ [View Project Board](https://github.com/YourUsername/helpdesk-system/projects/1)
 
 
-Author
+### Author
 
-Lutho Ngwala
+**Lutho Ngwala**
 A junior software developer passionate about backend systems, databases, and solving real-world problems.
