@@ -42,7 +42,7 @@ dotnet run
 
 ##  Project Management
 We track progress using GitHub Projects:  
- [View Project Board](https://github.com/YourUsername/helpdesk-system/projects/1)
+ [View Project Board](https://github.com/users/LeonNgwala/projects/2)
 
 
 ### Author
