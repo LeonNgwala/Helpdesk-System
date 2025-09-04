@@ -59,11 +59,6 @@ namespace Helpdesk.Api.Migrations
                 name: "IX_Comments_TicketId",
                 table: "Comments",
                 column: "TicketId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tickets_Status_Priority",
-                table: "Tickets",
-                columns: new[] { "Status", "Priority" });
         }
 
         /// <inheritdoc />

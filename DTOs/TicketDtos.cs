@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Helpdesk.Api.Models;
+using HelpdeskSystem.Models;
 
-namespace Helpdesk.Api.DTOs
+namespace HelpdeskSystem.DTos
 {
     public class TicketCreateDto
     {

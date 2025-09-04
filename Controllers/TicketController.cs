@@ -1,198 +1,80 @@
-using Helpdesk.Api.Data;
-using Helpdesk.Api.DTOs;
-using Helpdesk.Api.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using HelpdeskSystem.Models;
+using HelpdeskSystem.Data;
 
-namespace Helpdesk.Api.Controllers
+namespace HelpdeskSystem.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class TicketsController : ControllerBase
     {
-        private readonly AppDbContext _db;
+        private readonly AppDbContext _context;
 
-        public TicketsController(AppDbContext db) => _db = db;
+        public TicketsController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         // GET: api/tickets
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TicketListItemDto>>> GetAll()
+        public IActionResult GetTickets()
         {
-            var items = await _db.Tickets
-                .Select(t => new TicketListItemDto
-                {
-                    Id = t.Id,
-                    Title = t.Title,
-                    Priority = t.Priority,
-                    Status = t.Status,
-                    AssignedTo = t.AssignedTo,
-                    CreatedAtUtc = t.CreatedAtUtc,
-                    CommentCount = t.Comments.Count
-                })
-                .OrderByDescending(t => t.CreatedAtUtc)
-                .ToListAsync();
-
-            return Ok(items);
+            return Ok(_context.Tickets.ToList());
         }
 
-        // GET: api/tickets/5
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<TicketDetailDto>> GetById(int id)
+        // GET: api/tickets/{id}
+        [HttpGet("{id}")]
+        public IActionResult GetTicket(int id)
         {
-            var t = await _db.Tickets
-                .Include(x => x.Comments)
-                .FirstOrDefaultAsync(x => x.Id == id);
-
-            if (t == null) return NotFound();
-
-            var dto = new TicketDetailDto
+            var ticket = _context.Tickets.Find(id);
+            if (ticket == null)
             {
-                Id = t.Id,
-                Title = t.Title,
-                Description = t.Description,
-                Priority = t.Priority,
-                Status = t.Status,
-                Reporter = t.Reporter,
-                AssignedTo = t.AssignedTo,
-                CreatedAtUtc = t.CreatedAtUtc,
-                UpdatedAtUtc = t.UpdatedAtUtc,
-                DueDateUtc = t.DueDateUtc,
-                ClosedAtUtc = t.ClosedAtUtc,
-                Comments = t.Comments
-                    .OrderByDescending(c => c.CreatedAtUtc)
-                    .Select(c => new CommentDto
-                    {
-                        Id = c.Id,
-                        Author = c.Author,
-                        Body = c.Body,
-                        CreatedAtUtc = c.CreatedAtUtc
-                    })
-                    .ToList()
-            };
-
-            return Ok(dto);
+                return NotFound(new { message = "Ticket not found" });
+            }
+            return Ok(ticket);
         }
 
         // POST: api/tickets
         [HttpPost]
-        public async Task<ActionResult<TicketDetailDto>> Create([FromBody] TicketCreateDto input)
+        public IActionResult CreateTicket(Ticket ticket)
         {
-            // ModelState is auto-validated by [ApiController]
-            var entity = new Ticket
-            {
-                Title = input.Title,
-                Description = input.Description,
-                Priority = input.Priority,
-                Reporter = input.Reporter,
-                DueDateUtc = input.DueDateUtc
-            };
-
-            _db.Tickets.Add(entity);
-            await _db.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetById), new { id = entity.Id }, new TicketDetailDto
-            {
-                Id = entity.Id,
-                Title = entity.Title,
-                Description = entity.Description,
-                Priority = entity.Priority,
-                Status = entity.Status,
-                Reporter = entity.Reporter,
-                AssignedTo = entity.AssignedTo,
-                CreatedAtUtc = entity.CreatedAtUtc,
-                UpdatedAtUtc = entity.UpdatedAtUtc,
-                DueDateUtc = entity.DueDateUtc,
-                ClosedAtUtc = entity.ClosedAtUtc,
-                Comments = new List<CommentDto>()
-            });
+            _context.Tickets.Add(ticket);
+            _context.SaveChanges();
+            return CreatedAtAction(nameof(GetTicket), new { id = ticket.Id }, ticket);
         }
 
-        // PUT: api/tickets/5  (partial-style update)
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] TicketUpdateDto input)
+        // PUT: api/tickets/{id}
+        [HttpPut("{id}")]
+        public IActionResult UpdateTicket(int id, Ticket updatedTicket)
         {
-            var t = await _db.Tickets.FindAsync(id);
-            if (t == null) return NotFound();
-
-            if (input.Title is not null) t.Title = input.Title;
-            if (input.Description is not null) t.Description = input.Description;
-            if (input.Priority.HasValue) t.Priority = input.Priority.Value;
-            if (input.Status.HasValue) t.Status = input.Status.Value;
-            if (input.AssignedTo is not null) t.AssignedTo = input.AssignedTo;
-            if (input.DueDateUtc.HasValue) t.DueDateUtc = input.DueDateUtc.Value;
-
-            await _db.SaveChangesAsync();
-            return NoContent();
-        }
-
-        // DELETE: api/tickets/5
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var t = await _db.Tickets.FindAsync(id);
-            if (t == null) return NotFound();
-
-            _db.Tickets.Remove(t);
-            await _db.SaveChangesAsync();
-            return NoContent();
-        }
-
-        // POST: api/tickets/5/comments
-        [HttpPost("{id:int}/comments")]
-        public async Task<ActionResult<CommentDto>> AddComment(int id, [FromBody] CommentCreateDto input)
-        {
-            var t = await _db.Tickets.FindAsync(id);
-            if (t == null) return NotFound();
-
-            var c = new Comment
+            var ticket = _context.Tickets.Find(id);
+            if (ticket == null)
             {
-                TicketId = id,
-                Author = input.Author,
-                Body = input.Body
-            };
+                return NotFound(new { message = "Ticket not found" });
+            }
 
-            _db.Comments.Add(c);
-            await _db.SaveChangesAsync();
+            ticket.Title = updatedTicket.Title;
+            ticket.Description = updatedTicket.Description;
+            ticket.Status = updatedTicket.Status;
 
-            return CreatedAtAction(nameof(GetById), new { id }, new CommentDto
-            {
-                Id = c.Id, Author = c.Author, Body = c.Body, CreatedAtUtc = c.CreatedAtUtc
-            });
+            _context.SaveChanges();
+
+            return Ok(ticket);
         }
 
-        // POST: api/tickets/5/transition?status=InProgress
-        [HttpPost("{id:int}/transition")]
-        public async Task<IActionResult> Transition(int id, [FromQuery] TicketStatus status)
+        // DELETE: api/tickets/{id}
+        [HttpDelete("{id}")]
+        public IActionResult DeleteTicket(int id)
         {
-            var t = await _db.Tickets.FindAsync(id);
-            if (t == null) return NotFound();
-
-            // naive rules: Open -> InProgress -> Resolved -> Closed
-            bool ok = t.Status switch
+            var ticket = _context.Tickets.Find(id);
+            if (ticket == null)
             {
-                TicketStatus.Open when status is TicketStatus.InProgress => true,
-                TicketStatus.InProgress when status is TicketStatus.Resolved => true,
-                TicketStatus.Resolved when status is TicketStatus.Closed => true,
-                _ => false
-            };
+                return NotFound(new { message = "Ticket not found" });
+            }
 
-            if (!ok) return BadRequest("Invalid status transition.");
+            _context.Tickets.Remove(ticket);
+            _context.SaveChanges();
 
-            t.Status = status;
-            await _db.SaveChangesAsync();
-            return NoContent();
-        }
-
-        // POST: api/tickets/5/assign?assignee=it.support@company.com
-        [HttpPost("{id:int}/assign")]
-        public async Task<IActionResult> Assign(int id, [FromQuery] string assignee)
-        {
-            if (string.IsNullOrWhiteSpace(assignee)) return BadRequest("Assignee required.");
-            var t = await _db.Tickets.FindAsync(id);
-            if (t == null) return NotFound();
-
-            t.AssignedTo = assignee.Trim();
-            await _db.SaveChangesAsync();
             return NoContent();
         }
     }

@@ -1,20 +1,18 @@
-using Helpdesk.Api.Data;
+using HelpdeskSystem.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add controllers & Swagger
+// Connect EF Core with SQLite
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add DbContext (SQLite)
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 var app = builder.Build();
 
-// Swagger (dev only is fine; ok to expose locally)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -22,6 +20,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization(); // will matter when we add JWT
+app.UseAuthorization();
 app.MapControllers();
 app.Run();

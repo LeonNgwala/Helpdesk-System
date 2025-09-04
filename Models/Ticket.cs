@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Helpdesk.Api.Models
+namespace HelpdeskSystem.Models
 {
     public class Ticket
     {

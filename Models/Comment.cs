@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Helpdesk.Api.Models
+namespace HelpdeskSystem.Models
 {
     public class Comment
     {
