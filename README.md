@@ -8,7 +8,13 @@ This project is designed for learning and portfolio purposes, showcasing how to 
 ##  Features (so far)
 - ASP.NET Core Web API setup
 - Ticket model with properties (Id, Title, Description, Status, CreatedAt)
-- REST endpoints for tickets (GET, POST)
+- SQLite database with EF Core
+- REST endpoints for tickets:
+  - [x] GET all tickets
+  - [x] GET ticket by Id
+  - [x] POST create ticket
+  - [x] PUT update ticket
+  - [x] DELETE remove ticket
 - Swagger UI for API testing
 
 ---
